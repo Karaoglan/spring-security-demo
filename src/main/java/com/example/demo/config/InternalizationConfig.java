@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,9 @@ import java.util.Locale;
 @Configuration
 public class InternalizationConfig implements WebMvcConfigurer {
 
+    @Autowired
+    private MessageSource messageSource;
+
     @Bean
     public LocaleResolver localeResolver() {
         SessionLocaleResolver slr = new SessionLocaleResolver();
@@ -31,7 +35,19 @@ public class InternalizationConfig implements WebMvcConfigurer {
         return lci;
     }
 
-    @Bean
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(localeChangeInterceptor());
+    }
+
+    /*@Override
+    public Validator getValidator() {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.setValidationMessageSource(messageSource);
+        return validator;
+    }*/
+
+    /*@Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource
                 = new ReloadableResourceBundleMessageSource();
@@ -39,22 +55,13 @@ public class InternalizationConfig implements WebMvcConfigurer {
         messageSource.setBasename("classpath:messages");
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
-    }
+    }*/
 
     @Bean(name = "validator")
     public LocalValidatorFactoryBean validator() {
         LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
-        bean.setValidationMessageSource(messageSource());
+        bean.setValidationMessageSource(messageSource);
         return bean;
     }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(localeChangeInterceptor());
-    }
-
-    @Override
-    public Validator getValidator() {
-        return validator();
-    }
 }
